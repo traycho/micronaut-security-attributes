@@ -1,4 +1,4 @@
-# pulsarix-micronaut-security-jwt
+# micronaut-security-jwt
 
 Brings claims validation of jwt tokens as part of controller using annotations.
 This is a tiny extension of `micronaut-security` using a new security rule `JwtClaimsSecurityRule` handling `@JwtClaims` annotation.
