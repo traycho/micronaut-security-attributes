@@ -1,10 +1,10 @@
-package com.pulsairx.micronaut.security.jwt.rules;
+package com.pulsairx.micronaut.security.attributes.rules;
 
 
-import com.pulsairx.micronaut.security.jwt.annotation.JwtClaim;
-import com.pulsairx.micronaut.security.jwt.annotation.JwtClaims;
-import com.pulsairx.micronaut.security.jwt.validation.JwtClaimValidator;
-import com.pulsairx.micronaut.security.jwt.validation.ResourceIdScopeValidator;
+import com.pulsairx.micronaut.security.attributes.annotation.Attribute;
+import com.pulsairx.micronaut.security.attributes.annotation.SecuredAttributes;
+import com.pulsairx.micronaut.security.attributes.validation.SecuredAttributeValidator;
+import com.pulsairx.micronaut.security.attributes.validation.ResourceIdScopeValidator;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.rules.SecurityRuleResult;
@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
-public class JwtClaimsSecurityRuleTest {
+public class SecuredAttributesSecurityRuleTest {
 
     private static final String SCOPES = "scp";
 
@@ -45,20 +45,20 @@ public class JwtClaimsSecurityRuleTest {
     @Mock
     private HttpRequest httpRequest;
 
-    private JwtClaimsSecurityRule securityRule;
+    private SecuredAttributesRule securityRule;
 
     @BeforeEach
     public void setUp() {
-        this.securityRule = new JwtClaimsSecurityRule(rolesFinder, applicationContext);
+        this.securityRule = new SecuredAttributesRule(rolesFinder, applicationContext);
     }
 
-    void setupExpectedClaims(JwtClaim[] claims) {
+    void setupExpectedClaims(Attribute[] claims) {
         Optional expectedClaims = Optional.of(claims);
-        Mockito.when(routeMatch.getValue(JwtClaims.class, JwtClaim[].class)).thenReturn(expectedClaims);
+        Mockito.when(routeMatch.getValue(SecuredAttributes.class, Attribute[].class)).thenReturn(expectedClaims);
     }
 
-    JwtClaim createClaimAnnotation(String name, String[] contains, String matches, Class<? extends JwtClaimValidator> jwtClaimValidator) {
-        return new JwtClaim() {
+    Attribute createAttributeAnnotation(String name, String[] contains, String matches, Class<? extends SecuredAttributeValidator> attributeValidator) {
+        return new Attribute() {
 
             @Override
             public Class<? extends Annotation> annotationType() {
@@ -81,14 +81,14 @@ public class JwtClaimsSecurityRuleTest {
             }
 
             @Override
-            public Class<? extends JwtClaimValidator> validator() {
-                return jwtClaimValidator;
+            public Class<? extends SecuredAttributeValidator> validator() {
+                return attributeValidator;
             }
         };
     }
 
     @Test
-    void testJwtClaimsWithNullableParams() {
+    void testSecuredAttributeWithNullableParams() {
         SecurityRuleResult result = this.securityRule.check(httpRequest, null, null);
         Assertions.assertEquals(SecurityRuleResult.UNKNOWN, result);
     }
@@ -96,8 +96,8 @@ public class JwtClaimsSecurityRuleTest {
     @Test
     void testContainsParameter() {
         String issuer = "issuer";
-        setupExpectedClaims(new JwtClaim[]{
-                createClaimAnnotation(io.micronaut.security.token.jwt.generator.claims.JwtClaims.ISSUER, new String[]{issuer}, null, null)
+        setupExpectedClaims(new Attribute[]{
+                createAttributeAnnotation(ISSUER, new String[]{issuer}, null, null)
         });
         Map<String, Object> claims = new HashMap<>();
         claims.put(ISSUER, issuer);
@@ -109,8 +109,8 @@ public class JwtClaimsSecurityRuleTest {
     void testContainsParameterWithRejection() {
         String issuer = "issuer";
         String notExpctedIssuer = "notExpectedIssuer";
-        setupExpectedClaims(new JwtClaim[]{
-                createClaimAnnotation(ISSUER, new String[]{issuer}, null, null)
+        setupExpectedClaims(new Attribute[]{
+                createAttributeAnnotation(ISSUER, new String[]{issuer}, null, null)
         });
 
         Map<String, Object> claims = new HashMap<>();
@@ -122,8 +122,8 @@ public class JwtClaimsSecurityRuleTest {
     @Test
     void testValidatorParameter() throws URISyntaxException {
         String resourceId = UUID.randomUUID().toString();
-        setupExpectedClaims(new JwtClaim[]{
-                createClaimAnnotation(null, null, null, ResourceIdScopeValidator.class)
+        setupExpectedClaims(new Attribute[]{
+                createAttributeAnnotation(null, null, null, ResourceIdScopeValidator.class)
         });
         Map<String, Object> claims = new HashMap<>();
         claims.put(SCOPES, resourceId);
@@ -137,8 +137,8 @@ public class JwtClaimsSecurityRuleTest {
     void testValidatorParameterRejected() throws URISyntaxException {
         String resourceId = UUID.randomUUID().toString();
         String unexpectedResourceId = UUID.randomUUID().toString();
-        setupExpectedClaims(new JwtClaim[]{
-                createClaimAnnotation(null, null, null, ResourceIdScopeValidator.class)
+        setupExpectedClaims(new Attribute[]{
+                createAttributeAnnotation(null, null, null, ResourceIdScopeValidator.class)
         });
         Map<String, Object> claims = new HashMap<>();
         claims.put(SCOPES, unexpectedResourceId);
@@ -151,8 +151,8 @@ public class JwtClaimsSecurityRuleTest {
     @Test
     void testMatchesParameter() throws URISyntaxException {
         String issuer = "onlyLetters";
-        setupExpectedClaims(new JwtClaim[]{
-                createClaimAnnotation(ISSUER, null, "[a-zA-z]+", null)
+        setupExpectedClaims(new Attribute[]{
+                createAttributeAnnotation(ISSUER, null, "[a-zA-z]+", null)
         });
         Map<String, Object> claims = new HashMap<>();
         claims.put(ISSUER, issuer);
@@ -163,8 +163,8 @@ public class JwtClaimsSecurityRuleTest {
     @Test
     void testMatchesParameterRejected() throws URISyntaxException {
         String issuer = "1234567890";
-        setupExpectedClaims(new JwtClaim[]{
-                createClaimAnnotation("iss", null, "[a-zA-z]+", null)
+        setupExpectedClaims(new Attribute[]{
+                createAttributeAnnotation("iss", null, "[a-zA-z]+", null)
         });
         Map<String, Object> claims = new HashMap<>();
         claims.put(ISSUER, issuer);

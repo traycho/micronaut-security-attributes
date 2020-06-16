@@ -1,15 +1,15 @@
-# pulsarix-micronaut-security-jwt
+# pulsarix-micronaut-security
 
-Brings claims validation of jwt tokens as part of controller using annotations.
-This is a tiny extension of `micronaut-security` using a new security rule `JwtClaimsSecurityRule` handling `@JwtClaims` annotation.
+Brings authentication attributes validationas part of controller using annotations.
+This is a tiny extension of `micronaut-security` using a new security rule `SecuredAttributesRule` handling `@SecuredAttributes` annotation.
 
 
-### Validate claim using `contains parameter
+### Validate authentication attribute using `contains parameter
 ```java
 @Controller
 class Controller{
-        @JwtClaims(value={
-           @JwtClaim(name="iss", contains={ "appIssuer"}),
+        @SecuredAttributes(value={
+           @Attribute(name="iss", contains={ "appIssuer"}),
         })
         @Get
         public HttpResponse index(){
@@ -18,12 +18,12 @@ class Controller{
 }
 ```
 
-### Validate claim using `matches` parameter
+### Validate authentication attribute using `matches` parameter
 ```java
 @Controller
 class Controller{
-        @JwtClaims(value={
-           @JwtClaim(name="iss", matches="[a-zA-z]+"),
+        @SecuredAttributes(value={
+           @Attribute(name="iss", matches="[a-zA-z]+"),
         })
         @Get
         public HttpResponse index(){
@@ -32,13 +32,13 @@ class Controller{
 }
 ```
   
-### Validate multiple claims
+### Validate multiple authentication attributes
 ```java
 @Controller
 class Controller{
-        @JwtClaims(value={
-                @JwtClaim(name="iss", contains={ "appIssuer" }),
-                @JwtClaim(name="scp", contains={"read"})
+        @SecuredAttributes(value={
+                @Attribute(name="iss", contains={ "appIssuer" }),
+                @Attribute(name="scp", contains={"read"})
         })
         @Get
         public HttpResponse index(){
@@ -47,12 +47,12 @@ class Controller{
 }
 ```
 
-### Validate claims using custom `validator`
+### Validate authentication attribute using custom `validator
 ```java
 @Controller
 class Controller{
-        @JwtClaims(value={
-             @JwtClaim(validator=ResourceIdScopeValidator.class) 
+        @SecuredAttributes(value={
+             @Attribute(validator=ResourceIdScopeValidator.class) 
         })
         @Get("/resource/{id}")
         public HttpResponse index(final @PathVariable String id){

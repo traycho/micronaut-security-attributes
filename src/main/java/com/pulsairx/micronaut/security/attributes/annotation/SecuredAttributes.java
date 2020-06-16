@@ -1,4 +1,4 @@
-package com.pulsairx.micronaut.security.jwt.annotation;
+package com.pulsairx.micronaut.security.attributes.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface JwtClaims {
+public @interface SecuredAttributes {
 
-    JwtClaim[] value() default {};
+    Attribute[] value() default {};
 }
 

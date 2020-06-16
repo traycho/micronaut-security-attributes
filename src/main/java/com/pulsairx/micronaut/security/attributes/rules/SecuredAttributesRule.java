@@ -1,16 +1,14 @@
-package com.pulsairx.micronaut.security.jwt.rules;
+package com.pulsairx.micronaut.security.attributes.rules;
 
-import com.pulsairx.micronaut.security.jwt.annotation.JwtClaim;
-import com.pulsairx.micronaut.security.jwt.annotation.JwtClaims;
-import com.pulsairx.micronaut.security.jwt.util.ClaimUtil;
-import com.pulsairx.micronaut.security.jwt.validation.JwtClaimValidator;
+import com.pulsairx.micronaut.security.attributes.annotation.Attribute;
+import com.pulsairx.micronaut.security.attributes.annotation.SecuredAttributes;
+import com.pulsairx.micronaut.security.attributes.util.AttributesUtil;
+import com.pulsairx.micronaut.security.attributes.validation.SecuredAttributeValidator;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.rules.AbstractSecurityRule;
 import io.micronaut.security.rules.SecuredAnnotationRule;
 import io.micronaut.security.rules.SecurityRuleResult;
-import io.micronaut.security.token.Claims;
-import io.micronaut.security.token.MapClaims;
 import io.micronaut.security.token.RolesFinder;
 import io.micronaut.web.router.MethodBasedRouteMatch;
 import io.micronaut.web.router.RouteMatch;
@@ -30,16 +28,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Jwt claims security rule.
- * It handles jwt claims annotation {@link JwtClaims}
+ * Authentication attributes security rule.
+ * It handles authentication attributes annotation {@link SecuredAttributes}
  *
  * @see AbstractSecurityRule
- * @see JwtClaim
- * @see JwtClaims
+ * @see Attribute
+ * @see SecuredAttributes
  */
 @Slf4j
 @Singleton
-public class JwtClaimsSecurityRule extends AbstractSecurityRule {
+public class SecuredAttributesRule extends AbstractSecurityRule {
 
     /**
      * The order of the rule.
@@ -63,7 +61,7 @@ public class JwtClaimsSecurityRule extends AbstractSecurityRule {
      * @param applicationContext application context
      */
     @Inject
-    JwtClaimsSecurityRule(final RolesFinder rolesFinder, final ApplicationContext applicationContext) {
+    SecuredAttributesRule(final RolesFinder rolesFinder, final ApplicationContext applicationContext) {
         super(rolesFinder);
         this.applicationContext = applicationContext;
     }
@@ -72,23 +70,22 @@ public class JwtClaimsSecurityRule extends AbstractSecurityRule {
      * {@inheritDoc}
      */
     @Override
-    public SecurityRuleResult check(final HttpRequest request, @Nullable final RouteMatch routeMatch, @Nullable Map<String, Object> claims) {
+    public SecurityRuleResult check(final HttpRequest request, @Nullable final RouteMatch routeMatch, @Nullable Map<String, Object> attributes) {
         SecurityRuleResult result = SecurityRuleResult.UNKNOWN;
         if (routeMatch instanceof MethodBasedRouteMatch) {
             MethodBasedRouteMatch methodRoute = ((MethodBasedRouteMatch) routeMatch);
-            List<JwtClaim> jwtClaims = getJwtClaims(methodRoute);
-            if (!jwtClaims.isEmpty()) {
-                if (claims == null) {
-                    claims = new HashMap<>();
+            List<Attribute> attributesAnnotaions = getAttributes(methodRoute);
+            if (!attributesAnnotaions.isEmpty()) {
+                if (attributes == null) {
+                    attributes = new HashMap<>();
                 }
-                Claims allClaims = new MapClaims(claims);
-                for (JwtClaim jwtClaim : jwtClaims) {
-                    if (jwtClaim.contains().length > 0) {
-                        result = claimContains(jwtClaim, allClaims);
-                    } else if (jwtClaim.matches().length() > 0) {
-                        result = claimMatches(jwtClaim, allClaims);
+                for (Attribute attribute : attributesAnnotaions) {
+                    if (attribute.contains().length > 0) {
+                        result = claimContains(attribute, attributes);
+                    } else if (attribute.matches().length() > 0) {
+                        result = claimMatches(attribute, attributes);
                     } else {
-                        result = claimValidator(request, jwtClaim, allClaims);
+                        result = claimValidator(request, attribute, attributes);
                     }
 
                     if (SecurityRuleResult.REJECTED.equals(result)) {
@@ -98,38 +95,38 @@ public class JwtClaimsSecurityRule extends AbstractSecurityRule {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("Jwt claims security rule result={}", result);
+            log.debug("Attributes security rule result={}", result);
         }
         return result;
     }
 
     /**
-     * Gets a list of {@link JwtClaim} annotations.
+     * Gets a list of {@link Attribute} annotations.
      *
      * @param methodRoute method route
      * @return a list of claim annotations
      */
-    private List<JwtClaim> getJwtClaims(final MethodBasedRouteMatch methodRoute) {
-        return methodRoute.getValue(JwtClaims.class, JwtClaim[].class)
+    private List<Attribute> getAttributes(final MethodBasedRouteMatch methodRoute) {
+        return methodRoute.getValue(SecuredAttributes.class, Attribute[].class)
                 .map(Arrays::asList)
                 .orElse(new ArrayList<>());
     }
 
     /**
-     * Validates jwt claim using matches field.
+     * Validates authentication attribute using matches field.
      *
-     * @param jwtClaim jwt claim
-     * @param claims   all claims
+     * @param attribute authentication attribute
+     * @param attributes all authentication attributes
      * @return {@link SecurityRuleResult}
      */
-    private SecurityRuleResult claimMatches(JwtClaim jwtClaim, Claims claims) {
+    private SecurityRuleResult claimMatches(Attribute attribute, Map<String,Object> attributes) {
         if (log.isDebugEnabled()) {
-            log.debug("Checks if claim={} matches={}", jwtClaim.name(), jwtClaim.matches());
+            log.debug("Checks if attribute={} matches={}", attribute.name(), attribute.matches());
         }
         SecurityRuleResult result = SecurityRuleResult.ALLOWED;
-        List<String> actualValues = ClaimUtil.findClaim(claims, jwtClaim.name());
+        List<String> actualValues = AttributesUtil.findClaim(attributes, attribute.name());
 
-        Pattern pattern = compiledPattern(jwtClaim.matches());
+        Pattern pattern = compiledPattern(attribute.matches());
 
         boolean found = false;
         for (String value : actualValues) {
@@ -162,19 +159,19 @@ public class JwtClaimsSecurityRule extends AbstractSecurityRule {
     }
 
     /**
-     * Validates jwt claims using contains field.
+     * Validates authentication attributes using contains field.
      *
-     * @param jwtClaim jwt claim
-     * @param claims   all claims
+     * @param attribute authentication attribute
+     * @param attributes all authentication attrobutes
      * @return {@link SecurityRuleResult}
      */
-    private SecurityRuleResult claimContains(JwtClaim jwtClaim, Claims claims) {
+    private SecurityRuleResult claimContains(Attribute attribute, Map<String,Object> attributes) {
         if (log.isDebugEnabled()) {
-            log.debug("Checks if claim={} contains={}", jwtClaim.name(), jwtClaim.contains());
+            log.debug("Checks if attribute={} contains={}", attribute.name(), attribute.contains());
         }
         SecurityRuleResult result = SecurityRuleResult.ALLOWED;
-        List<String> actualValues = ClaimUtil.findClaim(claims, jwtClaim.name());
-        List<String> expectedValues = Arrays.asList(jwtClaim.contains());
+        List<String> actualValues = AttributesUtil.findClaim(attributes, attribute.name());
+        List<String> expectedValues = Arrays.asList(attribute.contains());
         if (Collections.disjoint(actualValues, expectedValues)) {
             result = SecurityRuleResult.REJECTED;
         }
@@ -182,18 +179,18 @@ public class JwtClaimsSecurityRule extends AbstractSecurityRule {
     }
 
     /**
-     * Validates a jwt claim using {@link JwtClaimValidator}.
+     * Validates a authnetication attribute using {@link SecuredAttributeValidator}.
      *
      * @param request  http request
-     * @param jwtClaim jwt claim
-     * @param claims   all claims
+     * @param attribute authentication attribute
+     * @param attributes all authentication attributes
      * @return {@link SecurityRuleResult}
      */
-    private SecurityRuleResult claimValidator(HttpRequest request, JwtClaim jwtClaim, Claims claims) {
+    private SecurityRuleResult claimValidator(HttpRequest request, Attribute attribute, Map<String,Object> attributes) {
         if (log.isDebugEnabled()) {
-            log.debug("Checks claims validation using validator={}", jwtClaim.validator());
+            log.debug("Checks attribute validation using validator={}", attribute.validator());
         }
-        return applicationContext.getBean(jwtClaim.validator()).validate(request, claims);
+        return applicationContext.getBean(attribute.validator()).validate(request, attributes);
     }
 
     /**

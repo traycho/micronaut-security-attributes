@@ -1,11 +1,10 @@
-package com.pulsairx.micronaut.security.jwt.util;
-
-import io.micronaut.security.token.Claims;
+package com.pulsairx.micronaut.security.attributes.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class ClaimUtil {
+public class AttributesUtil {
 
     /**
      * Find a list of values for given claim using its name.
@@ -14,7 +13,7 @@ public class ClaimUtil {
      * @param claimName a claim name
      * @return a list of values
      */
-    public static List<String> findClaim(Claims claims, String claimName) {
+    public static List<String> findClaim(Map<String,Object> claims, String claimName) {
         List<String> items = new ArrayList<>();
         Object rolesObject = claims.get(claimName);
         if (rolesObject != null) {

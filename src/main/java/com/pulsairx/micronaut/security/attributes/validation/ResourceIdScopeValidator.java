@@ -1,30 +1,30 @@
-package com.pulsairx.micronaut.security.jwt.validation;
+package com.pulsairx.micronaut.security.attributes.validation;
 
 
-import com.pulsairx.micronaut.security.jwt.util.ClaimUtil;
+import com.pulsairx.micronaut.security.attributes.util.AttributesUtil;
 import io.micronaut.context.annotation.Prototype;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.rules.SecurityRuleResult;
-import io.micronaut.security.token.Claims;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Validates if resource id is part of jwt token scopes.
+ * Validates if resource id is part of authentication scope attributes.
  */
 @Prototype
-public class ResourceIdScopeValidator extends JwtClaimValidator {
+public class ResourceIdScopeValidator extends SecuredAttributeValidator {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SecurityRuleResult validate(HttpRequest request, Claims claims) {
+    public SecurityRuleResult validate(HttpRequest request, Map<String,Object> attributes) {
         SecurityRuleResult result = SecurityRuleResult.REJECTED;
 
-        if (claims != null) {
-            List<String> scopes = ClaimUtil.findClaim(claims, "scp");
+        if (attributes != null) {
+            List<String> scopes = AttributesUtil.findClaim(attributes, "scp");
             String resourceId = getResourceId(request);
             if (scopes.contains(resourceId)) {
                 result = SecurityRuleResult.ALLOWED;
