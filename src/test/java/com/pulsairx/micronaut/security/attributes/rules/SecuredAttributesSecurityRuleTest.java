@@ -29,9 +29,9 @@ import java.util.UUID;
 @ExtendWith(MockitoExtension.class)
 public class SecuredAttributesSecurityRuleTest {
 
-    private static final String SCOPES = "scp";
+    private static final String ATTRIBUTE_SCOPES = "scp";
 
-    private static final String ISSUER = "iss";
+    private static final String ATTRIBUTE_ISSUER = "iss";
 
     @Mock
     private RolesFinder rolesFinder;
@@ -97,10 +97,10 @@ public class SecuredAttributesSecurityRuleTest {
     void testContainsParameter() {
         String issuer = "issuer";
         setupExpectedClaims(new Attribute[]{
-                createAttributeAnnotation(ISSUER, new String[]{issuer}, null, null)
+                createAttributeAnnotation(ATTRIBUTE_ISSUER, new String[]{issuer}, null, null)
         });
         Map<String, Object> claims = new HashMap<>();
-        claims.put(ISSUER, issuer);
+        claims.put(ATTRIBUTE_ISSUER, issuer);
         SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
         Assertions.assertEquals(SecurityRuleResult.ALLOWED, result);
     }
@@ -110,11 +110,11 @@ public class SecuredAttributesSecurityRuleTest {
         String issuer = "issuer";
         String notExpctedIssuer = "notExpectedIssuer";
         setupExpectedClaims(new Attribute[]{
-                createAttributeAnnotation(ISSUER, new String[]{issuer}, null, null)
+                createAttributeAnnotation(ATTRIBUTE_ISSUER, new String[]{issuer}, null, null)
         });
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put(ISSUER, notExpctedIssuer);
+        claims.put(ATTRIBUTE_ISSUER, notExpctedIssuer);
         SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
         Assertions.assertEquals(SecurityRuleResult.REJECTED, result);
     }
@@ -126,7 +126,7 @@ public class SecuredAttributesSecurityRuleTest {
                 createAttributeAnnotation(null, null, null, ResourceIdScopeValidator.class)
         });
         Map<String, Object> claims = new HashMap<>();
-        claims.put(SCOPES, resourceId);
+        claims.put(ATTRIBUTE_SCOPES, resourceId);
         Mockito.when(httpRequest.getUri()).thenReturn(new URI("/resource/" + resourceId));
         Mockito.when(applicationContext.getBean(ResourceIdScopeValidator.class)).thenReturn(new ResourceIdScopeValidator());
         SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
@@ -141,7 +141,7 @@ public class SecuredAttributesSecurityRuleTest {
                 createAttributeAnnotation(null, null, null, ResourceIdScopeValidator.class)
         });
         Map<String, Object> claims = new HashMap<>();
-        claims.put(SCOPES, unexpectedResourceId);
+        claims.put(ATTRIBUTE_SCOPES, unexpectedResourceId);
         Mockito.when(httpRequest.getUri()).thenReturn(new URI("/resource/" + resourceId));
         Mockito.when(applicationContext.getBean(ResourceIdScopeValidator.class)).thenReturn(new ResourceIdScopeValidator());
         SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
@@ -152,10 +152,10 @@ public class SecuredAttributesSecurityRuleTest {
     void testMatchesParameter() throws URISyntaxException {
         String issuer = "onlyLetters";
         setupExpectedClaims(new Attribute[]{
-                createAttributeAnnotation(ISSUER, null, "[a-zA-z]+", null)
+                createAttributeAnnotation(ATTRIBUTE_ISSUER, null, "[a-zA-z]+", null)
         });
         Map<String, Object> claims = new HashMap<>();
-        claims.put(ISSUER, issuer);
+        claims.put(ATTRIBUTE_ISSUER, issuer);
         SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
         Assertions.assertEquals(SecurityRuleResult.ALLOWED, result);
     }
@@ -167,7 +167,7 @@ public class SecuredAttributesSecurityRuleTest {
                 createAttributeAnnotation("iss", null, "[a-zA-z]+", null)
         });
         Map<String, Object> claims = new HashMap<>();
-        claims.put(ISSUER, issuer);
+        claims.put(ATTRIBUTE_ISSUER, issuer);
         SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
         Assertions.assertEquals(SecurityRuleResult.REJECTED, result);
     }
