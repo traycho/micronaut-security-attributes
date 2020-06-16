@@ -1,7 +1,7 @@
-package com.pulsairx.micronaut.security.attributes.validation;
+package com.pulsarix.micronaut.security.attributes.validation;
 
 
-import com.pulsairx.micronaut.security.attributes.util.AttributesUtil;
+import com.pulsarix.micronaut.security.attributes.util.Attributes;
 import io.micronaut.context.annotation.Prototype;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.rules.SecurityRuleResult;
@@ -12,19 +12,24 @@ import java.util.Map;
 
 /**
  * Validates if resource id is part of authentication scope attributes.
+ *
+ * @see SecuredAttributeValidator
  */
 @Prototype
 public class ResourceIdScopeValidator extends SecuredAttributeValidator {
+
+    private static final String ATTRIBUTE_SCOPES = "scp";
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SecurityRuleResult validate(HttpRequest request, Map<String,Object> attributes) {
+    public SecurityRuleResult validate(HttpRequest request, Map<String, Object> attributes) {
+
         SecurityRuleResult result = SecurityRuleResult.REJECTED;
 
         if (attributes != null) {
-            List<String> scopes = AttributesUtil.findClaim(attributes, "scp");
+            List<String> scopes = Attributes.find(attributes, ATTRIBUTE_SCOPES);
             String resourceId = getResourceId(request);
             if (scopes.contains(resourceId)) {
                 result = SecurityRuleResult.ALLOWED;

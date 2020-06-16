@@ -1,9 +1,9 @@
-package com.pulsairx.micronaut.security.attributes.rules;
+package com.pulsarix.micronaut.security.attributes.rules;
 
-import com.pulsairx.micronaut.security.attributes.annotation.Attribute;
-import com.pulsairx.micronaut.security.attributes.annotation.SecuredAttributes;
-import com.pulsairx.micronaut.security.attributes.util.AttributesUtil;
-import com.pulsairx.micronaut.security.attributes.validation.SecuredAttributeValidator;
+import com.pulsarix.micronaut.security.attributes.annotation.Attribute;
+import com.pulsarix.micronaut.security.attributes.annotation.SecuredAttributes;
+import com.pulsarix.micronaut.security.attributes.util.Attributes;
+import com.pulsarix.micronaut.security.attributes.validation.SecuredAttributeValidator;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.rules.AbstractSecurityRule;
@@ -81,11 +81,11 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
                 }
                 for (Attribute attribute : attributesAnnotaions) {
                     if (attribute.contains().length > 0) {
-                        result = claimContains(attribute, attributes);
+                        result = attributeContains(attribute, attributes);
                     } else if (attribute.matches().length() > 0) {
-                        result = claimMatches(attribute, attributes);
+                        result = attributeMatches(attribute, attributes);
                     } else {
-                        result = claimValidator(request, attribute, attributes);
+                        result = attributeValidator(request, attribute, attributes);
                     }
 
                     if (SecurityRuleResult.REJECTED.equals(result)) {
@@ -104,7 +104,7 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
      * Gets a list of {@link Attribute} annotations.
      *
      * @param methodRoute method route
-     * @return a list of claim annotations
+     * @return a list of attributes annotations
      */
     private List<Attribute> getAttributes(final MethodBasedRouteMatch methodRoute) {
         return methodRoute.getValue(SecuredAttributes.class, Attribute[].class)
@@ -119,12 +119,12 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
      * @param attributes all authentication attributes
      * @return {@link SecurityRuleResult}
      */
-    private SecurityRuleResult claimMatches(Attribute attribute, Map<String,Object> attributes) {
+    private SecurityRuleResult attributeMatches(Attribute attribute, Map<String,Object> attributes) {
         if (log.isDebugEnabled()) {
             log.debug("Checks if attribute={} matches={}", attribute.name(), attribute.matches());
         }
         SecurityRuleResult result = SecurityRuleResult.ALLOWED;
-        List<String> actualValues = AttributesUtil.findClaim(attributes, attribute.name());
+        List<String> actualValues = Attributes.find(attributes, attribute.name());
 
         Pattern pattern = compiledPattern(attribute.matches());
 
@@ -162,15 +162,15 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
      * Validates authentication attributes using contains field.
      *
      * @param attribute authentication attribute
-     * @param attributes all authentication attrobutes
+     * @param attributes all authentication attributes
      * @return {@link SecurityRuleResult}
      */
-    private SecurityRuleResult claimContains(Attribute attribute, Map<String,Object> attributes) {
+    private SecurityRuleResult attributeContains(Attribute attribute, Map<String,Object> attributes) {
         if (log.isDebugEnabled()) {
             log.debug("Checks if attribute={} contains={}", attribute.name(), attribute.contains());
         }
         SecurityRuleResult result = SecurityRuleResult.ALLOWED;
-        List<String> actualValues = AttributesUtil.findClaim(attributes, attribute.name());
+        List<String> actualValues = Attributes.find(attributes, attribute.name());
         List<String> expectedValues = Arrays.asList(attribute.contains());
         if (Collections.disjoint(actualValues, expectedValues)) {
             result = SecurityRuleResult.REJECTED;
@@ -179,14 +179,14 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
     }
 
     /**
-     * Validates a authnetication attribute using {@link SecuredAttributeValidator}.
+     * Validates a authentication attribute using {@link SecuredAttributeValidator}.
      *
      * @param request  http request
      * @param attribute authentication attribute
      * @param attributes all authentication attributes
      * @return {@link SecurityRuleResult}
      */
-    private SecurityRuleResult claimValidator(HttpRequest request, Attribute attribute, Map<String,Object> attributes) {
+    private SecurityRuleResult attributeValidator(HttpRequest request, Attribute attribute, Map<String,Object> attributes) {
         if (log.isDebugEnabled()) {
             log.debug("Checks attribute validation using validator={}", attribute.validator());
         }

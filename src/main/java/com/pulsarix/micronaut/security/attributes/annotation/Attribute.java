@@ -1,6 +1,6 @@
-package com.pulsairx.micronaut.security.attributes.annotation;
+package com.pulsarix.micronaut.security.attributes.annotation;
 
-import com.pulsairx.micronaut.security.attributes.validation.SecuredAttributeValidator;
+import com.pulsarix.micronaut.security.attributes.validation.SecuredAttributeValidator;
 
 public @interface Attribute {
 

@@ -1,16 +1,16 @@
-package com.pulsairx.micronaut.security.attributes.validation;
+package com.pulsarix.micronaut.security.attributes.validation;
 
-import com.pulsairx.micronaut.security.attributes.annotation.Attribute;
+
+import com.pulsarix.micronaut.security.attributes.annotation.Attribute;
+import com.pulsarix.micronaut.security.attributes.annotation.SecuredAttributes;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.rules.SecurityRuleResult;
-import io.micronaut.security.token.Claims;
-
 import java.util.Map;
 
 /**
  * Authentication attributes validator.
  *
- * @see Claims
+ * @see SecuredAttributes
  * @see Attribute
  */
 public abstract class SecuredAttributeValidator {

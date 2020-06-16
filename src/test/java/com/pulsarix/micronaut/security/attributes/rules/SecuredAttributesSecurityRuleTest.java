@@ -1,10 +1,10 @@
-package com.pulsairx.micronaut.security.attributes.rules;
+package com.pulsarix.micronaut.security.attributes.rules;
 
 
-import com.pulsairx.micronaut.security.attributes.annotation.Attribute;
-import com.pulsairx.micronaut.security.attributes.annotation.SecuredAttributes;
-import com.pulsairx.micronaut.security.attributes.validation.SecuredAttributeValidator;
-import com.pulsairx.micronaut.security.attributes.validation.ResourceIdScopeValidator;
+import com.pulsarix.micronaut.security.attributes.annotation.Attribute;
+import com.pulsarix.micronaut.security.attributes.annotation.SecuredAttributes;
+import com.pulsarix.micronaut.security.attributes.validation.SecuredAttributeValidator;
+import com.pulsarix.micronaut.security.attributes.validation.ResourceIdScopeValidator;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.rules.SecurityRuleResult;
@@ -52,9 +52,9 @@ public class SecuredAttributesSecurityRuleTest {
         this.securityRule = new SecuredAttributesRule(rolesFinder, applicationContext);
     }
 
-    void setupExpectedClaims(Attribute[] claims) {
-        Optional expectedClaims = Optional.of(claims);
-        Mockito.when(routeMatch.getValue(SecuredAttributes.class, Attribute[].class)).thenReturn(expectedClaims);
+    void setupExpectedAttributes(Attribute[] attributes) {
+        Optional expectedAttributes = Optional.of(attributes);
+        Mockito.when(routeMatch.getValue(SecuredAttributes.class, Attribute[].class)).thenReturn(expectedAttributes);
     }
 
     Attribute createAttributeAnnotation(String name, String[] contains, String matches, Class<? extends SecuredAttributeValidator> attributeValidator) {
@@ -96,12 +96,12 @@ public class SecuredAttributesSecurityRuleTest {
     @Test
     void testContainsParameter() {
         String issuer = "issuer";
-        setupExpectedClaims(new Attribute[]{
+        setupExpectedAttributes(new Attribute[]{
                 createAttributeAnnotation(ATTRIBUTE_ISSUER, new String[]{issuer}, null, null)
         });
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(ATTRIBUTE_ISSUER, issuer);
-        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put(ATTRIBUTE_ISSUER, issuer);
+        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, attributes);
         Assertions.assertEquals(SecurityRuleResult.ALLOWED, result);
     }
 
@@ -109,27 +109,27 @@ public class SecuredAttributesSecurityRuleTest {
     void testContainsParameterWithRejection() {
         String issuer = "issuer";
         String notExpctedIssuer = "notExpectedIssuer";
-        setupExpectedClaims(new Attribute[]{
+        setupExpectedAttributes(new Attribute[]{
                 createAttributeAnnotation(ATTRIBUTE_ISSUER, new String[]{issuer}, null, null)
         });
 
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(ATTRIBUTE_ISSUER, notExpctedIssuer);
-        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put(ATTRIBUTE_ISSUER, notExpctedIssuer);
+        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, attributes);
         Assertions.assertEquals(SecurityRuleResult.REJECTED, result);
     }
 
     @Test
     void testValidatorParameter() throws URISyntaxException {
         String resourceId = UUID.randomUUID().toString();
-        setupExpectedClaims(new Attribute[]{
+        setupExpectedAttributes(new Attribute[]{
                 createAttributeAnnotation(null, null, null, ResourceIdScopeValidator.class)
         });
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(ATTRIBUTE_SCOPES, resourceId);
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put(ATTRIBUTE_SCOPES, resourceId);
         Mockito.when(httpRequest.getUri()).thenReturn(new URI("/resource/" + resourceId));
         Mockito.when(applicationContext.getBean(ResourceIdScopeValidator.class)).thenReturn(new ResourceIdScopeValidator());
-        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
+        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, attributes);
         Assertions.assertEquals(SecurityRuleResult.ALLOWED, result);
     }
 
@@ -137,38 +137,38 @@ public class SecuredAttributesSecurityRuleTest {
     void testValidatorParameterRejected() throws URISyntaxException {
         String resourceId = UUID.randomUUID().toString();
         String unexpectedResourceId = UUID.randomUUID().toString();
-        setupExpectedClaims(new Attribute[]{
+        setupExpectedAttributes(new Attribute[]{
                 createAttributeAnnotation(null, null, null, ResourceIdScopeValidator.class)
         });
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(ATTRIBUTE_SCOPES, unexpectedResourceId);
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put(ATTRIBUTE_SCOPES, unexpectedResourceId);
         Mockito.when(httpRequest.getUri()).thenReturn(new URI("/resource/" + resourceId));
         Mockito.when(applicationContext.getBean(ResourceIdScopeValidator.class)).thenReturn(new ResourceIdScopeValidator());
-        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
+        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, attributes);
         Assertions.assertEquals(SecurityRuleResult.REJECTED, result);
     }
 
     @Test
     void testMatchesParameter() throws URISyntaxException {
         String issuer = "onlyLetters";
-        setupExpectedClaims(new Attribute[]{
+        setupExpectedAttributes(new Attribute[]{
                 createAttributeAnnotation(ATTRIBUTE_ISSUER, null, "[a-zA-z]+", null)
         });
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(ATTRIBUTE_ISSUER, issuer);
-        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put(ATTRIBUTE_ISSUER, issuer);
+        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, attributes);
         Assertions.assertEquals(SecurityRuleResult.ALLOWED, result);
     }
 
     @Test
     void testMatchesParameterRejected() throws URISyntaxException {
         String issuer = "1234567890";
-        setupExpectedClaims(new Attribute[]{
+        setupExpectedAttributes(new Attribute[]{
                 createAttributeAnnotation("iss", null, "[a-zA-z]+", null)
         });
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(ATTRIBUTE_ISSUER, issuer);
-        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, claims);
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put(ATTRIBUTE_ISSUER, issuer);
+        SecurityRuleResult result = this.securityRule.check(httpRequest, routeMatch, attributes);
         Assertions.assertEquals(SecurityRuleResult.REJECTED, result);
     }
 }
