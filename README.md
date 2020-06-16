@@ -1,4 +1,4 @@
-# pulsarix-micronaut-security
+# micronaut-security-attributes
 
 Brings authentication attributes validationas part of controller using annotations.
 This is a tiny extension of `micronaut-security` using a new security rule `SecuredAttributesRule` handling `@SecuredAttributes` annotation.
