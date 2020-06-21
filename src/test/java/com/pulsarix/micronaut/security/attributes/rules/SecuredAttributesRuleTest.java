@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
-public class SecuredAttributesSecurityRuleTest {
+public class SecuredAttributesRuleTest {
 
     private static final String ATTRIBUTE_SCOPES = "scp";
 

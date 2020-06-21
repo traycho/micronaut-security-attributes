@@ -20,13 +20,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Authentication attributes security rule.
@@ -39,6 +35,9 @@ import java.util.regex.Pattern;
 @Singleton
 public class SecuredAttributesRule extends AbstractSecurityRule {
 
+    /**
+     * Default logger.
+     */
     private static final Logger LOG = LoggerFactory.getLogger(SecuredAttributesRule.class);
 
     /**
@@ -47,14 +46,9 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
     public static final Integer ORDER = SecuredAnnotationRule.ORDER - 100;
 
     /**
-     * Compiled patterns.
-     */
-    private static final Map<String, Pattern> COMPILED_PATTERNS = new ConcurrentHashMap<>();
-
-    /**
      * Application context.
      */
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     /**
      * Constructor.
@@ -81,7 +75,7 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
                 if (attributes == null) {
                     attributes = new HashMap<>();
                 }
-                if(LOG.isDebugEnabled()){
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Checking secured attributes={}", attributes);
                 }
                 for (Attribute attribute : attributesAnnotations) {
@@ -100,7 +94,7 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
             }
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Attributes security rule result={}", result);
+            LOG.debug("Security attributes rule result is {}", result);
         }
         return result;
     }
@@ -120,65 +114,37 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
     /**
      * Validates authentication attribute using matches field.
      *
-     * @param attribute authentication attribute
+     * @param attribute  authentication attribute
      * @param attributes all authentication attributes
      * @return {@link SecurityRuleResult}
      */
-    private SecurityRuleResult attributeMatches(Attribute attribute, Map<String,Object> attributes) {
+    private SecurityRuleResult attributeMatches(Attribute attribute, Map<String, Object> attributes) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Checks if attribute={} matches={}", attribute.name(), attribute.matches());
         }
-        SecurityRuleResult result = SecurityRuleResult.ALLOWED;
-        List<String> actualValues = Attributes.find(attributes, attribute.name());
+        SecurityRuleResult result = SecurityRuleResult.REJECTED;
 
-        Pattern pattern = compiledPattern(attribute.matches());
-
-        boolean found = false;
-        for (String value : actualValues) {
-            Matcher matcher = pattern.matcher(value);
-            if (matcher.matches()) {
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            result = SecurityRuleResult.REJECTED;
+        if (Attributes.matches(attribute.name(), attribute.matches(), attributes)) {
+            result = SecurityRuleResult.ALLOWED;
         }
         return result;
     }
 
     /**
-     * Reuse existing pattern and compile only in case it is not available.
-     *
-     * @param regex regex pattern
-     * @return {@link Pattern}
-     */
-    private Pattern compiledPattern(String regex) {
-        Pattern pattern = COMPILED_PATTERNS.get(regex);
-        if (pattern == null) {
-            pattern = Pattern.compile(regex);
-            COMPILED_PATTERNS.put(regex, pattern);
-        }
-        return pattern;
-    }
-
-    /**
      * Validates authentication attributes using contains field.
      *
-     * @param attribute authentication attribute
+     * @param attribute  authentication attribute
      * @param attributes all authentication attributes
      * @return {@link SecurityRuleResult}
      */
-    private SecurityRuleResult attributeContains(Attribute attribute, Map<String,Object> attributes) {
+    private SecurityRuleResult attributeContains(Attribute attribute, Map<String, Object> attributes) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Checks if attribute={} contains={}", attribute.name(), attribute.contains());
         }
-        SecurityRuleResult result = SecurityRuleResult.ALLOWED;
-        List<String> actualValues = Attributes.find(attributes, attribute.name());
-        List<String> expectedValues = Arrays.asList(attribute.contains());
-        if (Collections.disjoint(actualValues, expectedValues)) {
-            result = SecurityRuleResult.REJECTED;
+
+        SecurityRuleResult result = SecurityRuleResult.REJECTED;
+        if (Attributes.contains(attribute.name(), Arrays.asList(attribute.contains()), attributes)) {
+            result = SecurityRuleResult.ALLOWED;
         }
         return result;
     }
@@ -186,12 +152,12 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
     /**
      * Validates a authentication attribute using {@link SecuredAttributeValidator}.
      *
-     * @param request  http request
-     * @param attribute authentication attribute
+     * @param request    http request
+     * @param attribute  authentication attribute
      * @param attributes all authentication attributes
      * @return {@link SecurityRuleResult}
      */
-    private SecurityRuleResult attributeValidator(HttpRequest request, Attribute attribute, Map<String,Object> attributes) {
+    private SecurityRuleResult attributeValidator(HttpRequest request, Attribute attribute, Map<String, Object> attributes) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Checks attribute validation using validator={}", attribute.validator());
         }
