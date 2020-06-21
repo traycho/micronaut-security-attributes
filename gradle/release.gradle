@@ -1,0 +1,22 @@
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+def manvenUser = System.getenv("MAVEN_USERNAME")
+def mavenPass = System.getenv("MAVEN_PASSWORD")
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username = manvenUser
+                password = mavenPass
+            }
+            url  "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        }
+    }
+}

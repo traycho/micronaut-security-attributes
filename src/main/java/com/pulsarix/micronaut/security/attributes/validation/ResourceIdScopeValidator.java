@@ -2,10 +2,10 @@ package com.pulsarix.micronaut.security.attributes.validation;
 
 
 import com.pulsarix.micronaut.security.attributes.util.Attributes;
-import io.micronaut.context.annotation.Prototype;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.rules.SecurityRuleResult;
 
+import javax.inject.Singleton;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @see SecuredAttributeValidator
  */
-@Prototype
+@Singleton
 public class ResourceIdScopeValidator extends SecuredAttributeValidator {
 
     private static final String ATTRIBUTE_SCOPES = "scp";

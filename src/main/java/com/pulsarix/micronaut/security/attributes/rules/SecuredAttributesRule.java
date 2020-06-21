@@ -12,7 +12,8 @@ import io.micronaut.security.rules.SecurityRuleResult;
 import io.micronaut.security.token.RolesFinder;
 import io.micronaut.web.router.MethodBasedRouteMatch;
 import io.micronaut.web.router.RouteMatch;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -35,9 +36,10 @@ import java.util.regex.Pattern;
  * @see Attribute
  * @see SecuredAttributes
  */
-@Slf4j
 @Singleton
 public class SecuredAttributesRule extends AbstractSecurityRule {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SecuredAttributesRule.class);
 
     /**
      * The order of the rule.
@@ -47,7 +49,7 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
     /**
      * Compiled patterns.
      */
-    private static final Map<String, Pattern> COMIPLED_PATTERNS = new ConcurrentHashMap<>();
+    private static final Map<String, Pattern> COMPILED_PATTERNS = new ConcurrentHashMap<>();
 
     /**
      * Application context.
@@ -74,12 +76,15 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
         SecurityRuleResult result = SecurityRuleResult.UNKNOWN;
         if (routeMatch instanceof MethodBasedRouteMatch) {
             MethodBasedRouteMatch methodRoute = ((MethodBasedRouteMatch) routeMatch);
-            List<Attribute> attributesAnnotaions = getAttributes(methodRoute);
-            if (!attributesAnnotaions.isEmpty()) {
+            List<Attribute> attributesAnnotations = getAttributes(methodRoute);
+            if (!attributesAnnotations.isEmpty()) {
                 if (attributes == null) {
                     attributes = new HashMap<>();
                 }
-                for (Attribute attribute : attributesAnnotaions) {
+                if(LOG.isDebugEnabled()){
+                    LOG.debug("Checking secured attributes={}", attributes);
+                }
+                for (Attribute attribute : attributesAnnotations) {
                     if (attribute.contains().length > 0) {
                         result = attributeContains(attribute, attributes);
                     } else if (attribute.matches().length() > 0) {
@@ -94,8 +99,8 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
                 }
             }
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Attributes security rule result={}", result);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Attributes security rule result={}", result);
         }
         return result;
     }
@@ -120,8 +125,8 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
      * @return {@link SecurityRuleResult}
      */
     private SecurityRuleResult attributeMatches(Attribute attribute, Map<String,Object> attributes) {
-        if (log.isDebugEnabled()) {
-            log.debug("Checks if attribute={} matches={}", attribute.name(), attribute.matches());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Checks if attribute={} matches={}", attribute.name(), attribute.matches());
         }
         SecurityRuleResult result = SecurityRuleResult.ALLOWED;
         List<String> actualValues = Attributes.find(attributes, attribute.name());
@@ -150,10 +155,10 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
      * @return {@link Pattern}
      */
     private Pattern compiledPattern(String regex) {
-        Pattern pattern = COMIPLED_PATTERNS.get(regex);
+        Pattern pattern = COMPILED_PATTERNS.get(regex);
         if (pattern == null) {
             pattern = Pattern.compile(regex);
-            COMIPLED_PATTERNS.put(regex, pattern);
+            COMPILED_PATTERNS.put(regex, pattern);
         }
         return pattern;
     }
@@ -166,8 +171,8 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
      * @return {@link SecurityRuleResult}
      */
     private SecurityRuleResult attributeContains(Attribute attribute, Map<String,Object> attributes) {
-        if (log.isDebugEnabled()) {
-            log.debug("Checks if attribute={} contains={}", attribute.name(), attribute.contains());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Checks if attribute={} contains={}", attribute.name(), attribute.contains());
         }
         SecurityRuleResult result = SecurityRuleResult.ALLOWED;
         List<String> actualValues = Attributes.find(attributes, attribute.name());
@@ -187,8 +192,8 @@ public class SecuredAttributesRule extends AbstractSecurityRule {
      * @return {@link SecurityRuleResult}
      */
     private SecurityRuleResult attributeValidator(HttpRequest request, Attribute attribute, Map<String,Object> attributes) {
-        if (log.isDebugEnabled()) {
-            log.debug("Checks attribute validation using validator={}", attribute.validator());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Checks attribute validation using validator={}", attribute.validator());
         }
         return applicationContext.getBean(attribute.validator()).validate(request, attributes);
     }

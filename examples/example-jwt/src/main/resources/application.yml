@@ -1,0 +1,27 @@
+---
+micronaut:
+  application:
+    name: example-jwt
+
+---
+micronaut:
+  security:
+    enabled: true
+    endpoints:
+      login:
+        enabled: false
+      oauth:
+        enabled: false
+      keys:
+        enabled: true
+    token:
+      basicAuth:
+        enabled: false
+      jwt:
+        enabled: true
+        bearer:
+          enabled: true
+        signatures:
+          secret:
+            generator:
+              secret: '"${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThisSecretForANewOne}"'
