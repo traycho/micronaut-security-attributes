@@ -1,8 +1,8 @@
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
-def manvenUser = System.getenv("MAVEN_USERNAME")
-def mavenPass = System.getenv("MAVEN_PASSWORD")
+def manvenUser = System.getenv("SONATYPE_USERNAME")
+def mavenPass = System.getenv("SONATYPE_PASSWORD")
 
 publishing {
     publications {
