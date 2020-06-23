@@ -1,10 +1,27 @@
 # micronaut-security-attributes
 
-Brings authentication attributes validationas part of controller using annotations.
+
+Brings authentication attributes validation part of controller using annotations.
 This is a tiny extension of `micronaut-security` using a new security rule `SecuredAttributesRule` handling `@SecuredAttributes` annotation.
+Library is not related to any particular authentication method its target is to handle in generic way authentication attributes available in 
+`Authentication` instance. 
 
+For more details check https://docs.micronaut.io/latest/api/io/micronaut/security/authentication/Authentication.html
 
-### Validate authentication attribute using `contains parameter
+## Setup
+
+To use the Micronaut’s security capabilities you must have the security dependency on your classpath. For example in `build.gradle`
+
+```groovy
+annotationProcessor "io.micronaut:micronaut-security"
+compile "io.micronaut:micronaut-security"
+
+compile "com.pulsarix.micronaut:micronaut-security-attributes:1.0.0"
+```
+
+## Examples
+
+### Validate authentication attribute using `contains` parameter
 ```java
 @Controller
 class Controller{
@@ -32,7 +49,7 @@ class Controller{
 }
 ```
   
-### Validate multiple authentication attributes
+### Validate multiple authentication attributes using `contains` parameter
 ```java
 @Controller
 class Controller{
@@ -47,7 +64,7 @@ class Controller{
 }
 ```
 
-### Validate authentication attribute using custom `validator
+### Validate authentication attribute using custom `validator`
 ```java
 @Controller
 class Controller{

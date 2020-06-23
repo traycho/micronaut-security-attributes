@@ -10,7 +10,6 @@ version "0.1"
 group "example.jwt"
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven { url "https://jcenter.bintray.com" }
 }
