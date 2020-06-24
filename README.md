@@ -1,5 +1,7 @@
 # micronaut-security-attributes
 
+[![](https://github.com/traycho/micronaut-security-attributes/workflows/Java%20Build%20CI/badge.svg)](https://github.com/traycho/micronaut-security-attributes/actions)
+
 Brings authentication attributes validation part of controller using annotations.
 This is a tiny extension of `micronaut-security` using a new security rule `SecuredAttributesRule` handling `@SecuredAttributes` annotation.
 Library is not related to any particular authentication method its target is to handle in generic way authentication attributes available in 
