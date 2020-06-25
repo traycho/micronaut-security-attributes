@@ -20,6 +20,10 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
+            afterEvaluate {
+                artifact javadocJar
+                artifact sourceJar
+            }
             pom {
                 name = project.name
                 description = project.description
