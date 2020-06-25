@@ -5,6 +5,7 @@ apply plugin: 'idea'
 apply plugin: 'application'
 
 group "com.pulsarix.micronaut"
+description "Micronaut Security Attributes"
 
 repositories {
     maven { url "https://oss.jfrog.org/oss-snapshot-local" }
