@@ -64,6 +64,20 @@ jar {
     archiveVersion = "$releaseVersion"
 }
 
+task javadocJar(type: Jar) {
+    archiveClassifier = "javadoc"
+}
+
+task sourceJar(type: Jar) {
+    archiveClassifier = "sources"
+}
+
+artifacts {
+    archives jar
+    archives sourceJar
+    archives javadocJar
+}
+
 
 test {
     useJUnitPlatform()

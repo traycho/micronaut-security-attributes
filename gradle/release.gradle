@@ -1,22 +1,63 @@
 apply plugin: 'maven'
+apply plugin: 'signing'
 apply plugin: 'maven-publish'
 
-def manvenUser = System.getenv("SONATYPE_USERNAME")
+def mavenUser = System.getenv("SONATYPE_USERNAME")
 def mavenPass = System.getenv("SONATYPE_PASSWORD")
+def gpgKeyId = System.getenv("GPG_KEY_ID")
+def gpgPassword = System.getenv("GPG_PASSWORD")
+
+ext."signing.keyId" = gpgKeyId
+ext."signing.password" = gpgPassword
+
+if (file("${rootDir}/pubring.gpg").exists()) {
+    ext."signing.secretKeyRingFile" = file("${rootDir}/pubring.gpg").absolutePath
+} else if (file("${System.getenv('HOME')}/.gnupg/pubring.gpg").exists()){
+    ext."signing.secretKeyRingFile" = file("${System.getenv('HOME')}/.gnupg/pubring.gpg").absolutePath
+}
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
+            pom {
+                name = project.name
+                description = project.description
+                url = 'https://github.com/traycho/micronaut-security-attributes'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'traycho'
+                        name = 'Traycho Ivanov'
+                        email = 'traycho@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/traycho/micronaut-security-attributes.git'
+                    developerConnection = 'scm:git:ssh://github.com:traycho/micronaut-security-attributes.git'
+                    url = 'https://github.com/traycho/micronaut-security-attributes'
+                }
+            }
         }
     }
     repositories {
         maven {
             credentials {
-                username = manvenUser
+                username = mavenUser
                 password = mavenPass
             }
             url  "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
         }
+    }
+}
+
+if(ext."signing.keyId" && ext."signing.password") {
+    signing {
+        sign publishing.publications.mavenJava
     }
 }
