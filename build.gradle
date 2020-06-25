@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'application'
@@ -53,29 +54,10 @@ idea {
 
 mainClassName = '.'
 
-task versionInfo() {
-    project.ext.set("releaseVersion", "${project.version}")
-}
 
-
-jar {
-    dependsOn versionInfo
-    archiveBaseName = artifactId
-    archiveVersion = "$releaseVersion"
-}
-
-task javadocJar(type: Jar) {
-    archiveClassifier = "javadoc"
-}
-
-task sourceJar(type: Jar) {
-    archiveClassifier = "sources"
-}
-
-artifacts {
-    archives jar
-    archives sourceJar
-    archives javadocJar
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 
