@@ -1,5 +1,6 @@
 # micronaut-security-attributes
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.pulsarix.micronaut/micronaut-security-attributes.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.pulsarix.micronaut%22%20AND%20a:%22micronaut-security-attributes%22)
 [![](https://github.com/traycho/micronaut-security-attributes/workflows/Java%20Build%20CI/badge.svg)](https://github.com/traycho/micronaut-security-attributes/actions)
 
 Brings authentication attributes validation part of controller using annotations.
