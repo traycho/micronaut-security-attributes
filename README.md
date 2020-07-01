@@ -10,15 +10,22 @@ Library is not related to any particular authentication method its target is to 
 
 For more details check https://docs.micronaut.io/latest/api/io/micronaut/security/authentication/Authentication.html
 
+
 ## Setup
 
 To use the Micronaut’s security capabilities you must have the security dependency on your classpath. For example in `build.gradle`
+
+Official Micronaut Security Guide` is available with following link https://micronaut-projects.github.io/micronaut-security/latest/guide/
 
 ```groovy
 dependencies{ 
     annotationProcessor "io.micronaut:micronaut-security"
     compile "io.micronaut:micronaut-security"
-    
+
+    // Set your preferred authentication method 
+    // compile "io.micronaut.configuration:micronaut-security-ldap"
+    // compile "io.micronaut.configuration:micronaut-security-jwt"  
+
     compile "com.pulsarix.micronaut:micronaut-security-attributes:1.0.0"
 }
 ```
@@ -69,6 +76,47 @@ class Controller{
 ```
 
 ### Validate authentication attribute using custom `validator`
+As first step create a new validator class by implementing `SecuredAttributeValidator`.
+Given example below is validating if resouce identifier is part of `scopes` claim of jwt token. 
+```java
+@Singleton
+public class ResourceIdScopeValidator extends SecuredAttributeValidator {
+
+    private static final String ATTRIBUTE_SCOPES = "scp";
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SecurityRuleResult validate(HttpRequest request, Map<String, Object> attributes) {
+
+        SecurityRuleResult result = SecurityRuleResult.REJECTED;
+
+        if (attributes != null) {
+            List<String> scopes = Attributes.find(attributes, ATTRIBUTE_SCOPES);
+            String resourceId = getResourceId(request);
+            if (scopes.contains(resourceId)) {
+                result = SecurityRuleResult.ALLOWED;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Gets resource id from given http request.
+     *
+     * @param request http request
+     * @return resource identifier
+     */
+    String getResourceId(HttpRequest request) {
+        URI uri = request.getUri();
+        String path = uri.getPath();
+        return path.substring(path.lastIndexOf('/') + 1);
+    }
+}
+```
+
 ```java
 @Controller
 class Controller{
@@ -81,3 +129,4 @@ class Controller{
         }       
 }
 ```
+
