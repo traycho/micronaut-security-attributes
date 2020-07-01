@@ -8,8 +8,8 @@ group "com.pulsarix.micronaut"
 description "Micronaut Security Attributes"
 
 repositories {
-    maven { url "https://oss.jfrog.org/oss-snapshot-local" }
-    maven { url "https://repo.grails.org/grails/core" }
+    mavenCentral()
+    maven { url "https://jcenter.bintray.com" }
 }
 
 apply from: file('gradle/release.gradle')
