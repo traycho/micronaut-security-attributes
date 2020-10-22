@@ -2,7 +2,6 @@ package com.pulsarix.micronaut.security.attributes.validation;
 
 
 import com.pulsarix.micronaut.security.attributes.util.Attributes;
-import com.pulsarix.micronaut.security.attributes.validation.SecuredAttributeValidator;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.rules.SecurityRuleResult;
 
