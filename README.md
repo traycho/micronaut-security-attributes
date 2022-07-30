@@ -8,7 +8,7 @@ This is a tiny extension of `micronaut-security` using a new security rule `Secu
 Library is not related to any particular authentication method its target is to handle in generic way authentication attributes available in 
 `Authentication` instance. 
 
-For more details check https://docs.micronaut.io/latest/api/io/micronaut/security/authentication/Authentication.html
+For more details check https://micronaut-projects.github.io/micronaut-security/latest/api/io/micronaut/security/authentication/Authentication.html
 
 
 ## Setup
